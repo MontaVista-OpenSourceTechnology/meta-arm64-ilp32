@@ -1,12 +1,65 @@
-From bc79a203d42b41440315c2d0179f4eee0305d01b Mon Sep 17 00:00:00 2001
-From: Yury Norov <ynorov@caviumnetworks.com>
-Date: Tue, 18 Jul 2017 01:53:01 +0300
-Subject: [PATCH 1/8] aarch64-ilp32-final
+From a920ac7b17fdfb2f98bb72e0bd4177a890f245cc Mon Sep 17 00:00:00 2001
+From: Steve Ellcey <sellcey@caviumnetworks.com>
+Date: Mon, 14 Aug 2017 15:16:05 +0100
+Subject: [PATCH 02/10] aarch64: Add ILP32 support
 
-Upstream-Status: Backport [https://github.com/norov/glibc/tree/ilp32-2.26]
+Add support for the ILP32 abi variant to aarch64.
+
+2017-09-01  Andrew Pinski  <andrew.pinski@caviumnetworks.com>
+	    Yury Norov  <ynorov@caviumnetworks.com>
+	    Steve Ellcey  <sellcey@caviumnetworks.com>
+
+	* elf/cache.c (print_entry): Add FLAG_AARCH64_LIB32.
+	* sysdeps/aarch64/configure.ac (HAVE_AARCH64_ILP32): New define.
+	(default-abi): Allow for ilp32 ABI.
+	* sysdeps/aarch64/configure: Regenerate.
+	* sysdeps/aarch64/Implies: Deleted.
+	* sysdeps/aarch64/ilp32/Implies: New file.
+	* sysdeps/aarch64/ilp32/Implies-after: New file.
+	* sysdeps/aarch64/lp64/Implies: New file.
+	* sysdeps/aarch64/lp64/Implies-after: New file.
+	* sysdeps/aarch64/nptl/bits/pthreadtypes-arch.h
+	(__PTHREAD_RWLOCK_INT_FLAGS_SHARED): Set to 1.
+	* sysdeps/aarch64/preconfigure (machine): Check for ilp32/lp64.
+	* sysdeps/aarch64/tls-macros.h (TLS_IE): Remove register specification
+	for __result and ifdef for ILP32.
+	* sysdeps/generic/ldconfig.h (FLAG_AARCH64_LIB32): New define.
+	* sysdeps/unix/sysv/linux/aarch64/Implies: Remove generic and
+	wordsize-64 entries.
+	* sysdeps/unix/sysv/linux/aarch64/Makefile (abi-variants): Add
+	new variants for ilp32 and ilp32_be.
+	(abi-lp64-condition, abi-lp64_be-condition): Check for __WORDSIZE
+	equal to 64.
+	(abi-ilp32-condition, abi-ilp32_be-condition): New.
+	* sysdeps/unix/sysv/linux/aarch64/configure.ac (arch_minimum_kernel):
+	Use different value for ILP32.
+	(LIBC_SLIBDIR_RTLDDIR): Modify for ILP32.
+	* sysdeps/unix/sysv/linux/aarch64/configure: Regenerate.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/Implies: New file.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/c++-types.data: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/kernel_stat.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/shlib-versions: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/bits/stat.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/bits/statfs.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/bits/typesizes.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/bits/utmp.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/bits/utmpx.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/kernel-features.h: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/Implies: Add unix/sysv/linux/aarch64.
+	* sysdeps/unix/sysv/linux/aarch64/ioctl.S: Move to lp64 directory.
+	* sysdeps/unix/sysv/linux/aarch64/mmap.c: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/shlib-versions: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/c++-types.data: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/ldd-rewrite.sed: Likewise.
+	* sysdeps/unix/sysv/linux/aarch64/ipc_priv.h (__IPC_64): Check __ILP32
+	when setting.
+	* sysdeps/unix/sysv/linux/arm/readelflib.c (process_elf_file):
+	Check for EM_AARCH64 when processing ELFCLASS32 object.
+	* sysdeps/unix/sysv/linux/bits/fcntl-linux.h (F_GETLK, F_SETLCK,
+	F_SETLKW): Check for __OFF_T_MATCHES_OFF64_T when defining.
 ---
- ChangeLog                                          |  55 +++++++
  elf/cache.c                                        |   3 +
+ sysdeps/aarch64/configure                          |  15 +-
  sysdeps/aarch64/configure.ac                       |  11 +-
  sysdeps/aarch64/{ => ilp32}/Implies                |   2 +-
  sysdeps/aarch64/ilp32/Implies-after                |   1 +
@@ -17,12 +70,13 @@ Upstream-Status: Backport [https://github.com/norov/glibc/tree/ilp32-2.26]
  sysdeps/aarch64/tls-macros.h                       |  16 +-
  sysdeps/generic/ldconfig.h                         |   1 +
  sysdeps/unix/sysv/linux/aarch64/Implies            |   2 -
- sysdeps/unix/sysv/linux/aarch64/Makefile           |  16 +-
+ sysdeps/unix/sysv/linux/aarch64/Makefile           |   8 +-
  sysdeps/unix/sysv/linux/aarch64/bits/stat.h        | 178 +++++++++++++++++++++
  sysdeps/unix/sysv/linux/aarch64/bits/statfs.h      |  68 ++++++++
  sysdeps/unix/sysv/linux/aarch64/bits/typesizes.h   |  88 ++++++++++
  sysdeps/unix/sysv/linux/aarch64/bits/utmp.h        | 125 +++++++++++++++
  sysdeps/unix/sysv/linux/aarch64/bits/utmpx.h       | 104 ++++++++++++
+ sysdeps/unix/sysv/linux/aarch64/configure          |  23 ++-
  sysdeps/unix/sysv/linux/aarch64/configure.ac       |  10 +-
  sysdeps/unix/sysv/linux/aarch64/ilp32/Implies      |   4 +
  .../unix/sysv/linux/aarch64/ilp32/c++-types.data   |  67 ++++++++
@@ -37,7 +91,7 @@ Upstream-Status: Backport [https://github.com/norov/glibc/tree/ilp32-2.26]
  .../sysv/linux/aarch64/{ => lp64}/shlib-versions   |   0
  sysdeps/unix/sysv/linux/arm/readelflib.c           |   6 +-
  sysdeps/unix/sysv/linux/bits/fcntl-linux.h         |   2 +-
- 32 files changed, 811 insertions(+), 17 deletions(-)
+ 33 files changed, 781 insertions(+), 22 deletions(-)
  rename sysdeps/aarch64/{ => ilp32}/Implies (88%)
  create mode 100644 sysdeps/aarch64/ilp32/Implies-after
  create mode 100644 sysdeps/aarch64/lp64/Implies
@@ -59,7 +113,7 @@ Upstream-Status: Backport [https://github.com/norov/glibc/tree/ilp32-2.26]
  rename sysdeps/unix/sysv/linux/aarch64/{ => lp64}/shlib-versions (100%)
 
 diff --git a/elf/cache.c b/elf/cache.c
-index a76f89281d..765917fe0d 100644
+index c2c010f97b..5083a41ba7 100644
 --- a/elf/cache.c
 +++ b/elf/cache.c
 @@ -101,6 +101,9 @@ print_entry (const char *lib, int flag, unsigned int osversion,
@@ -72,6 +126,34 @@ index a76f89281d..765917fe0d 100644
      /* Uses the ARM soft-float ABI.  */
      case FLAG_ARM_LIBSF:
        fputs (",soft-float", stdout);
+diff --git a/sysdeps/aarch64/configure b/sysdeps/aarch64/configure
+index 5bd355a691..7dd56e8643 100644
+--- a/sysdeps/aarch64/configure
++++ b/sysdeps/aarch64/configure
+@@ -163,12 +163,19 @@ rm -f conftest*
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $libc_cv_aarch64_be" >&5
+ $as_echo "$libc_cv_aarch64_be" >&6; }
++
++if test $aarch64_config_abi = ilp32; then
++  $as_echo "#define HAVE_AARCH64_ILP32 1" >>confdefs.h
++
++fi
++
+ if test $libc_cv_aarch64_be = yes; then
+   $as_echo "#define HAVE_AARCH64_BE 1" >>confdefs.h
+ 
+-  config_vars="$config_vars
+-default-abi = lp64_be"
++  libc_aarch64_be=_be
+ else
+-  config_vars="$config_vars
+-default-abi = lp64"
++  libc_aarch64_be=
+ fi
++
++config_vars="$config_vars
++default-abi = ${aarch64_config_abi}${libc_aarch64_be}"
 diff --git a/sysdeps/aarch64/configure.ac b/sysdeps/aarch64/configure.ac
 index 7851dd4dac..90693252a3 100644
 --- a/sysdeps/aarch64/configure.ac
@@ -135,10 +217,10 @@ index 0000000000..a8cae95f9d
 @@ -0,0 +1 @@
 +wordsize-64
 diff --git a/sysdeps/aarch64/nptl/bits/pthreadtypes-arch.h b/sysdeps/aarch64/nptl/bits/pthreadtypes-arch.h
-index d13a75db07..9aa9f04ac7 100644
+index 008aa7e0c7..4ca06fdd26 100644
 --- a/sysdeps/aarch64/nptl/bits/pthreadtypes-arch.h
 +++ b/sysdeps/aarch64/nptl/bits/pthreadtypes-arch.h
-@@ -65,5 +65,6 @@ struct __pthread_rwlock_arch_t
+@@ -67,5 +67,6 @@ struct __pthread_rwlock_arch_t
  };
  
  #define __PTHREAD_RWLOCK_ELISION_EXTRA 0
@@ -166,7 +248,7 @@ index d9bd1f8558..b56d0aa1a1 100644
  	;;
  esac
 diff --git a/sysdeps/aarch64/tls-macros.h b/sysdeps/aarch64/tls-macros.h
-index 358ccbc490..fa27dc0f90 100644
+index cc58a7d6bf..82ed40ebb0 100644
 --- a/sysdeps/aarch64/tls-macros.h
 +++ b/sysdeps/aarch64/tls-macros.h
 @@ -32,8 +32,9 @@
@@ -200,14 +282,14 @@ index 358ccbc490..fa27dc0f90 100644
  #define TLS_LE(x)					\
    ({ register unsigned long __result asm ("x0");	\
 diff --git a/sysdeps/generic/ldconfig.h b/sysdeps/generic/ldconfig.h
-index a61ce5ca15..be6b70c3e7 100644
+index 59e20dc3ef..81a6b5d4b4 100644
 --- a/sysdeps/generic/ldconfig.h
 +++ b/sysdeps/generic/ldconfig.h
-@@ -42,6 +42,7 @@
- #define FLAG_MIPS_LIB32_NAN2008		0x0c00
- #define FLAG_MIPS64_LIBN32_NAN2008	0x0d00
+@@ -44,6 +44,7 @@
  #define FLAG_MIPS64_LIBN64_NAN2008	0x0e00
-+#define FLAG_AARCH64_LIB32		0x0f00
+ #define FLAG_RISCV_FLOAT_ABI_SOFT	0x0f00
+ #define FLAG_RISCV_FLOAT_ABI_DOUBLE	0x1000
++#define FLAG_AARCH64_LIB32		0x1100
  
  /* Name of auxiliary cache.  */
  #define _PATH_LDCONFIG_AUX_CACHE "/var/cache/ldconfig/aux-cache"
@@ -220,10 +302,10 @@ index 4409e19b92..c508f2e0a6 100644
 -unix/sysv/linux/generic
 -unix/sysv/linux/wordsize-64
 diff --git a/sysdeps/unix/sysv/linux/aarch64/Makefile b/sysdeps/unix/sysv/linux/aarch64/Makefile
-index 6b4e620896..67619f5b45 100644
+index 57bbfeaac6..221dfee8df 100644
 --- a/sysdeps/unix/sysv/linux/aarch64/Makefile
 +++ b/sysdeps/unix/sysv/linux/aarch64/Makefile
-@@ -23,13 +23,21 @@ endif
+@@ -23,10 +23,14 @@ endif
  
  abi-variants := lp64
  abi-variants += lp64_be
@@ -234,20 +316,11 @@ index 6b4e620896..67619f5b45 100644
  Unknown ABI, must be one of $(abi-variants)
  endif
  
--abi-lp64-options := -U__AARCH64EB__
 -abi-lp64-condition := !defined __AARCH64EB__
-+abi-lp64-options := -U__AARCH64EB__ -D__LP64__ -U__ILP32__
-+abi-lp64-condition := __WORDSIZE == 64 && !defined __AARCH64EB__
- 
--abi-lp64_be-options := -D__AARCH64EB__
 -abi-lp64_be-condition := defined __AARCH64EB__
-+abi-lp64_be-options := -D__AARCH64EB__ -D__LP64__ -U__ILP32__
++abi-lp64-condition := __WORDSIZE == 64 && !defined __AARCH64EB__
 +abi-lp64_be-condition := __WORDSIZE == 64 && defined __AARCH64EB__
-+
-+abi-ilp32-options := -U__AARCH64EB__ -U__LP64__ -D__ILP32__
 +abi-ilp32-condition := __WORDSIZE == 32 && !defined __AARCH64EB__
-+
-+abi-ilp32_be-options := -D__AARCH64EB__ -U__LP64__ -D__ILP32__
 +abi-ilp32_be-condition := __WORDSIZE == 32 && defined __AARCH64EB__
 diff --git a/sysdeps/unix/sysv/linux/aarch64/bits/stat.h b/sysdeps/unix/sysv/linux/aarch64/bits/stat.h
 new file mode 100644
@@ -842,6 +915,44 @@ index 0000000000..bffd45cb3e
 +#ifdef __USE_GNU
 +# define ACCOUNTING	9	/* System accounting.  */
 +#endif
+diff --git a/sysdeps/unix/sysv/linux/aarch64/configure b/sysdeps/unix/sysv/linux/aarch64/configure
+index 27d50e1d3c..b7f7d12478 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/configure
++++ b/sysdeps/unix/sysv/linux/aarch64/configure
+@@ -1,9 +1,23 @@
+ # This file is generated from configure.ac by Autoconf.  DO NOT EDIT!
+  # Local configure fragment for sysdeps/unix/sysv/linux/aarch64.
+ 
+-arch_minimum_kernel=3.7.0
+-
+-test -n "$libc_cv_slibdir" ||
++if test $aarch64_config_abi = ilp32; then
++  arch_minimum_kernel=10.0.0
++  test -n "$libc_cv_slibdir" ||
++case "$prefix" in
++/usr | /usr/)
++  libc_cv_slibdir=/libilp32
++  libc_cv_rtlddir=/lib
++  if test "$libdir" = '${exec_prefix}/lib'; then
++    libdir='${exec_prefix}/libilp32';
++    # Locale data can be shared between 32-bit and 64-bit libraries.
++    libc_cv_complocaledir='${exec_prefix}/lib/locale'
++  fi
++  ;;
++esac
++else
++  arch_minimum_kernel=3.7.0
++  test -n "$libc_cv_slibdir" ||
+ case "$prefix" in
+ /usr | /usr/)
+   libc_cv_slibdir='/lib64'
+@@ -15,3 +29,6 @@ case "$prefix" in
+   fi
+   ;;
+ esac
++fi
++
++ldd_rewrite_script=$dir/ldd-rewrite.sed
 diff --git a/sysdeps/unix/sysv/linux/aarch64/configure.ac b/sysdeps/unix/sysv/linux/aarch64/configure.ac
 index 211fa9c317..8cc97efefc 100644
 --- a/sysdeps/unix/sysv/linux/aarch64/configure.ac
@@ -955,11 +1066,11 @@ index 0000000000..ac50f0e230
 +#define STAT_IS_KERNEL_STAT
 diff --git a/sysdeps/unix/sysv/linux/aarch64/ilp32/shlib-versions b/sysdeps/unix/sysv/linux/aarch64/ilp32/shlib-versions
 new file mode 100644
-index 0000000000..b714a92e3e
+index 0000000000..cd913f47f4
 --- /dev/null
 +++ b/sysdeps/unix/sysv/linux/aarch64/ilp32/shlib-versions
 @@ -0,0 +1,7 @@
-+DEFAULT			GLIBC_2.26
++DEFAULT			GLIBC_2.27
 +
 +%ifdef HAVE_AARCH64_BE
 +ld=ld-linux-aarch64_be_ilp32.so.1
@@ -967,7 +1078,7 @@ index 0000000000..b714a92e3e
 +ld=ld-linux-aarch64_ilp32.so.1
 +%endif
 diff --git a/sysdeps/unix/sysv/linux/aarch64/ipc_priv.h b/sysdeps/unix/sysv/linux/aarch64/ipc_priv.h
-index 8d12f31573..40a4d04984 100644
+index db527f3fbb..cd0d35e73a 100644
 --- a/sysdeps/unix/sysv/linux/aarch64/ipc_priv.h
 +++ b/sysdeps/unix/sysv/linux/aarch64/ipc_priv.h
 @@ -18,4 +18,8 @@
@@ -1046,7 +1157,7 @@ similarity index 100%
 rename from sysdeps/unix/sysv/linux/aarch64/shlib-versions
 rename to sysdeps/unix/sysv/linux/aarch64/lp64/shlib-versions
 diff --git a/sysdeps/unix/sysv/linux/arm/readelflib.c b/sysdeps/unix/sysv/linux/arm/readelflib.c
-index 65273bcf77..dfb8fd48fc 100644
+index a493e3a07f..c5a983bf22 100644
 --- a/sysdeps/unix/sysv/linux/arm/readelflib.c
 +++ b/sysdeps/unix/sysv/linux/arm/readelflib.c
 @@ -41,7 +41,11 @@ process_elf_file (const char *file_name, const char *lib, int *flag,
@@ -1063,7 +1174,7 @@ index 65273bcf77..dfb8fd48fc 100644
  	  if (elf32_header->e_flags & EF_ARM_ABI_FLOAT_HARD)
  	    *flag = FLAG_ARM_LIBHF|FLAG_ELF_LIBC6;
 diff --git a/sysdeps/unix/sysv/linux/bits/fcntl-linux.h b/sysdeps/unix/sysv/linux/bits/fcntl-linux.h
-index 0cd0a5d731..fd90598b32 100644
+index 269494261e..641a3f2844 100644
 --- a/sysdeps/unix/sysv/linux/bits/fcntl-linux.h
 +++ b/sysdeps/unix/sysv/linux/bits/fcntl-linux.h
 @@ -101,7 +101,7 @@

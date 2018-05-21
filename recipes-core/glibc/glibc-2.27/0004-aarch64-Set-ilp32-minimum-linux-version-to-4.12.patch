@@ -1,0 +1,48 @@
+From 48fb66a4f56dc923c766fcd2f32a228449d7b3e0 Mon Sep 17 00:00:00 2001
+From: Szabolcs Nagy <szabolcs.nagy@arm.com>
+Date: Mon, 21 Aug 2017 19:26:02 +0100
+Subject: [PATCH 04/10] aarch64: Set ilp32 minimum linux version to 4.12
+
+Mainline linux does not support ilp32 yet, but there is support
+for this abi since linux v4.12 in the arm64 linux repo under
+ilp32 staging branches.
+
+2017-09-01  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* sysdeps/unix/sysv/linux/aarch64/configure.ac (arch_minimum_kernel):
+	Set to 4.12.0 on ILP32.
+	* sysdeps/unix/sysv/linux/aarch64/configure: Regenerate.
+---
+ sysdeps/unix/sysv/linux/aarch64/configure    | 2 +-
+ sysdeps/unix/sysv/linux/aarch64/configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sysdeps/unix/sysv/linux/aarch64/configure b/sysdeps/unix/sysv/linux/aarch64/configure
+index b7f7d12478..2ef6702410 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/configure
++++ b/sysdeps/unix/sysv/linux/aarch64/configure
+@@ -2,7 +2,7 @@
+  # Local configure fragment for sysdeps/unix/sysv/linux/aarch64.
+ 
+ if test $aarch64_config_abi = ilp32; then
+-  arch_minimum_kernel=10.0.0
++  arch_minimum_kernel=4.12.0
+   test -n "$libc_cv_slibdir" ||
+ case "$prefix" in
+ /usr | /usr/)
+diff --git a/sysdeps/unix/sysv/linux/aarch64/configure.ac b/sysdeps/unix/sysv/linux/aarch64/configure.ac
+index 8cc97efefc..912b06b2f5 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/configure.ac
++++ b/sysdeps/unix/sysv/linux/aarch64/configure.ac
+@@ -2,7 +2,7 @@ GLIBC_PROVIDES dnl See aclocal.m4 in the top level source directory.
+ # Local configure fragment for sysdeps/unix/sysv/linux/aarch64.
+ 
+ if test $aarch64_config_abi = ilp32; then
+-  arch_minimum_kernel=10.0.0
++  arch_minimum_kernel=4.12.0
+   LIBC_SLIBDIR_RTLDDIR([libilp32], [lib])
+ else
+   arch_minimum_kernel=3.7.0
+-- 
+2.11.1
+

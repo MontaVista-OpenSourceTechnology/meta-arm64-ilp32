@@ -1,0 +1,126 @@
+From 54ee451a7427463ab178f6107a7cd51fb27a4e0c Mon Sep 17 00:00:00 2001
+From: Szabolcs Nagy <szabolcs.nagy@arm.com>
+Date: Mon, 25 Sep 2017 16:57:18 +0100
+Subject: [PATCH 06/10] aarch64: Update ILP32 abilists
+
+Update abilist files because a number of symbols got removed for
+GLIBC_2.27.  ILP32 now needs separate localplt.data as well
+because it has no matherr PLT anymore.
+
+(Eventually this will be merged into the initial abilist commit.)
+
+2017-09-29  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist
+	(__nss_group_lookup): Remove.
+	(__nss_hosts_lookup): Remove.
+	(__nss_passwd_lookup): Remove.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist
+	(_LIB_VERSION): Remove.
+	(matherr): Remove.
+	(pow10): Remove.
+	(pow10f): Remove.
+	(pow10l): Remove.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/libresolv.abilist
+	(_res_opcodes): Remove.
+	* sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data: New file.
+---
+ sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist  |  3 ---
+ sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist  |  5 -----
+ .../unix/sysv/linux/aarch64/ilp32/libresolv.abilist |  1 -
+ sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data | 21 +++++++++++++++++++++
+ .../sysv/linux/aarch64/{ => lp64}/localplt.data     |  0
+ 5 files changed, 21 insertions(+), 9 deletions(-)
+ create mode 100644 sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data
+ rename sysdeps/unix/sysv/linux/aarch64/{ => lp64}/localplt.data (100%)
+
+diff --git a/sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist b/sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist
+index 92da375358..fa390087a0 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist
++++ b/sysdeps/unix/sysv/linux/aarch64/ilp32/libc.abilist
+@@ -312,11 +312,8 @@ GLIBC_2.27 __newlocale F
+ GLIBC_2.27 __nl_langinfo_l F
+ GLIBC_2.27 __nss_configure_lookup F
+ GLIBC_2.27 __nss_database_lookup F
+-GLIBC_2.27 __nss_group_lookup F
+ GLIBC_2.27 __nss_hostname_digits_dots F
+-GLIBC_2.27 __nss_hosts_lookup F
+ GLIBC_2.27 __nss_next F
+-GLIBC_2.27 __nss_passwd_lookup F
+ GLIBC_2.27 __obstack_printf_chk F
+ GLIBC_2.27 __obstack_vprintf_chk F
+ GLIBC_2.27 __open F
+diff --git a/sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist b/sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist
+index b73a018874..c1decebe49 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist
++++ b/sysdeps/unix/sysv/linux/aarch64/ilp32/libm.abilist
+@@ -1,5 +1,4 @@
+ GLIBC_2.27 GLIBC_2.27 A
+-GLIBC_2.27 _LIB_VERSION D 0x4
+ GLIBC_2.27 __acos_finite F
+ GLIBC_2.27 __acosf_finite F
+ GLIBC_2.27 __acosh_finite F
+@@ -346,7 +345,6 @@ GLIBC_2.27 lrintl F
+ GLIBC_2.27 lround F
+ GLIBC_2.27 lroundf F
+ GLIBC_2.27 lroundl F
+-GLIBC_2.27 matherr F
+ GLIBC_2.27 modf F
+ GLIBC_2.27 modff F
+ GLIBC_2.27 modfl F
+@@ -369,9 +367,6 @@ GLIBC_2.27 nextup F
+ GLIBC_2.27 nextupf F
+ GLIBC_2.27 nextupl F
+ GLIBC_2.27 pow F
+-GLIBC_2.27 pow10 F
+-GLIBC_2.27 pow10f F
+-GLIBC_2.27 pow10l F
+ GLIBC_2.27 powf F
+ GLIBC_2.27 powl F
+ GLIBC_2.27 remainder F
+diff --git a/sysdeps/unix/sysv/linux/aarch64/ilp32/libresolv.abilist b/sysdeps/unix/sysv/linux/aarch64/ilp32/libresolv.abilist
+index 67eeb8c644..cf1374f1e4 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/ilp32/libresolv.abilist
++++ b/sysdeps/unix/sysv/linux/aarch64/ilp32/libresolv.abilist
+@@ -50,7 +50,6 @@ GLIBC_2.27 __sym_ntos F
+ GLIBC_2.27 __sym_ston F
+ GLIBC_2.27 _getlong F
+ GLIBC_2.27 _getshort F
+-GLIBC_2.27 _res_opcodes D 0x40
+ GLIBC_2.27 inet_net_ntop F
+ GLIBC_2.27 inet_net_pton F
+ GLIBC_2.27 inet_neta F
+diff --git a/sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data b/sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data
+new file mode 100644
+index 0000000000..4f3ffb0fc0
+--- /dev/null
++++ b/sysdeps/unix/sysv/linux/aarch64/ilp32/localplt.data
+@@ -0,0 +1,21 @@
++# See scripts/check-localplt.awk for how this file is processed.
++# PLT use is required for the malloc family and for matherr because
++# users can define their own functions and have library internals call them.
++libc.so: calloc
++libc.so: free
++libc.so: malloc
++libc.so: memalign
++libc.so: realloc
++# The dynamic loader needs __tls_get_addr for TLS.
++ld.so: __tls_get_addr
++# The main malloc is interposed into the dynamic linker, for
++# allocations after the initial link (when dlopen is used).
++ld.so: malloc
++ld.so: calloc
++ld.so: realloc
++ld.so: free
++# The TLS-enabled version of these functions is interposed from libc.so.
++ld.so: _dl_signal_error
++ld.so: _dl_catch_error
++ld.so: _dl_signal_exception
++ld.so: _dl_catch_exception
+diff --git a/sysdeps/unix/sysv/linux/aarch64/localplt.data b/sysdeps/unix/sysv/linux/aarch64/lp64/localplt.data
+similarity index 100%
+rename from sysdeps/unix/sysv/linux/aarch64/localplt.data
+rename to sysdeps/unix/sysv/linux/aarch64/lp64/localplt.data
+-- 
+2.11.1
+

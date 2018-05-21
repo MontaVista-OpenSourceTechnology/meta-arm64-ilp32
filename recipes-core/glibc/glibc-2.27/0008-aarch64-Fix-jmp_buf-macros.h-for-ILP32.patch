@@ -1,0 +1,32 @@
+From 0f05266e640d9660b37e864dba3b8c927c50a52a Mon Sep 17 00:00:00 2001
+From: Szabolcs Nagy <szabolcs.nagy@arm.com>
+Date: Fri, 10 Nov 2017 18:59:31 +0000
+Subject: [PATCH 08/10] aarch64: Fix jmp_buf-macros.h for ILP32.
+
+The offset is different on ILP32 because __saved_mask is 4 byte aligned.
+
+2017-11-28  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h (SAVED_MASK_OFFSET):
+	Fix for ILP32.
+---
+ sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h b/sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h
+index 608a7ad1f7..d0ced8761c 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h
++++ b/sysdeps/unix/sysv/linux/aarch64/jmp_buf-macros.h
+@@ -3,4 +3,8 @@
+ #define JMP_BUF_ALIGN 8
+ #define SIGJMP_BUF_ALIGN 8
+ #define MASK_WAS_SAVED_OFFSET 176
+-#define SAVED_MASK_OFFSET 184
++#ifdef __ILP32__
++# define SAVED_MASK_OFFSET 180
++#else
++# define SAVED_MASK_OFFSET 184
++#endif
+-- 
+2.11.1
+

@@ -1,0 +1,38 @@
+From a14439975bc84280a9a1cd9dc12036f796ee3d31 Mon Sep 17 00:00:00 2001
+From: Steve Ellcey <sellcey@cavium.com>
+Date: Thu, 31 Aug 2017 16:49:10 +0100
+Subject: [PATCH 05/10] aarch64: Fix ipc_perm definition for ILP32
+
+Here is another aarch64 ILP32 patch.  The mode field in ipc_perm in ILP32
+should be a 16 bit field, not a 32 bit one.  This was out-of-sync with what the
+kernel had.  This was causing sysvipc/test-sysvsem to fail in ILP32 mode.
+
+2017-09-01  Yury Norov  <ynorov@caviumnetworks.com>
+	    Steve Ellcey  <sellcey@cavium.com>
+
+	* sysdeps/unix/sysv/linux/aarch64/bits/ipc.h (ipc_perm):
+	Ifdef and pad the mode field for ILP32.
+---
+ sysdeps/unix/sysv/linux/aarch64/bits/ipc.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/sysdeps/unix/sysv/linux/aarch64/bits/ipc.h b/sysdeps/unix/sysv/linux/aarch64/bits/ipc.h
+index d66cf4412d..24a6825aad 100644
+--- a/sysdeps/unix/sysv/linux/aarch64/bits/ipc.h
++++ b/sysdeps/unix/sysv/linux/aarch64/bits/ipc.h
+@@ -46,7 +46,12 @@ struct ipc_perm
+     __gid_t gid;			/* Owner's group ID.  */
+     __uid_t cuid;			/* Creator's user ID.  */
+     __gid_t cgid;			/* Creator's group ID.  */
++#ifdef __LP64__
+     unsigned int mode;			/* Read/write permission.  */
++#else
++    unsigned short int mode;		/* Read/write permission.  */
++    unsigned short int __pad0;
++#endif
+     unsigned short int __seq;		/* Sequence number.  */
+     unsigned short int __pad1;
+     __syscall_ulong_t __glibc_reserved1;
+-- 
+2.11.1
+
