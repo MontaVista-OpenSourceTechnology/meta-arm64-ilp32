@@ -1,1 +1,1 @@
-EXTRA_OECONF_append_linux-gnuilp32 = " --disable-assembly "
+EXTRA_OECONF_append_aarchilp32 = " --disable-assembly "

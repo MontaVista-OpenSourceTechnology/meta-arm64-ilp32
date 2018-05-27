@@ -1,1 +1,1 @@
-VALGRIND_remove_linux-gnuilp32 = "valgrind"
+VALGRIND_remove_aarchilp32 = "valgrind"

@@ -35,7 +35,7 @@ PACKAGE_EXTRA_ARCHS_tune-aarch64_be_ilp32 = "aarch64_be_ilp32"
 ARMPKGSFX_ENDIAN_64 = "${@bb.utils.contains('TUNE_FEATURES', 'bigendian', '_be', '', d)}"
 TUNE_ARCH_64 = "aarch64${ARMPKGSFX_ENDIAN_64}"
 TUNE_PKGARCH_64 = "aarch64${ARMPKGSFX_ENDIAN_64}${ARMPKGSFX_ILP32}"
-ABIEXTENSION_64 = "${@bb.utils.contains('TUNE_FEATURES', 'ilp32', 'ilp32', '', d)}"
+ABIEXTENSION_64 = "${@bb.utils.contains('TUNE_FEATURES', 'ilp32', '_ilp32', '', d)}"
 TARGET_FPU_64 = ""
 
 # Duplicated from arch-arm.inc
