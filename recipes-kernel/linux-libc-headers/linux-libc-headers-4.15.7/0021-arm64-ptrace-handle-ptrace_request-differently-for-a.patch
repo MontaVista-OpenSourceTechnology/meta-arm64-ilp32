@@ -1,4 +1,4 @@
-From fd44ab1b628acae271cb86963cbce440f9402eaf Mon Sep 17 00:00:00 2001
+From 6afcd1dad367a51939b0b4417f4dd4c987cbf0f8 Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Thu, 5 Jan 2017 16:14:48 +0530
 Subject: [PATCH 21/25] arm64: ptrace: handle ptrace_request differently for
@@ -21,10 +21,10 @@ Signed-off-by: Chengming Zhou <zhouchengming1@huawei.com>
  1 file changed, 19 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/kernel/ptrace.c b/arch/arm64/kernel/ptrace.c
-index e2b7c04..356a747 100644
+index 5c7d5bbce..a63a5186d 100644
 --- a/arch/arm64/kernel/ptrace.c
 +++ b/arch/arm64/kernel/ptrace.c
-@@ -765,9 +765,11 @@ static const struct user_regset_view user_aarch64_view = {
+@@ -1038,9 +1038,11 @@ static const struct user_regset_view user_aarch64_view = {
  	.regsets = aarch64_regsets, .n = ARRAY_SIZE(aarch64_regsets)
  };
  
@@ -37,7 +37,7 @@ index e2b7c04..356a747 100644
  enum compat_regset {
  	REGSET_COMPAT_GPR,
  	REGSET_COMPAT_VFP,
-@@ -1223,7 +1225,7 @@ static int compat_ptrace_sethbpregs(struct task_struct *tsk, compat_long_t num,
+@@ -1503,7 +1505,7 @@ static int compat_ptrace_sethbpregs(struct task_struct *tsk, compat_long_t num,
  }
  #endif	/* CONFIG_HAVE_HW_BREAKPOINT */
  
@@ -46,7 +46,7 @@ index e2b7c04..356a747 100644
  			compat_ulong_t caddr, compat_ulong_t cdata)
  {
  	unsigned long addr = caddr;
-@@ -1300,8 +1302,23 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
+@@ -1580,8 +1582,23 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
  
  	return ret;
  }
@@ -71,5 +71,5 @@ index e2b7c04..356a747 100644
  {
  #ifdef CONFIG_AARCH32_EL0
 -- 
-2.6.4
+2.11.1
 

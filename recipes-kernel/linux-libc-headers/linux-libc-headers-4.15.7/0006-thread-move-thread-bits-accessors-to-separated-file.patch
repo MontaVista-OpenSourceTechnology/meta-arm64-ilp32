@@ -1,7 +1,7 @@
-From 600903d578b231465a112e485486ed3e4a0892cd Mon Sep 17 00:00:00 2001
+From 2dd4902b93f8bd85da273c53d013b6f0e09812d4 Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Tue, 24 May 2016 03:04:41 +0300
-Subject: [PATCH 10/25] thread: move thread bits accessors to separated file
+Subject: [PATCH 06/25] thread: move thread bits accessors to separated file
 
 They may be accessed from low-level code, so isolating is a measure to
 avoid circular dependencies in header files.
@@ -12,14 +12,27 @@ never should be)"
 
 Signed-off-by: Yury Norov <ynorov@caviumnetworks.com>
 ---
+ include/linux/sched.h       |  1 +
  include/linux/thread_bits.h | 74 +++++++++++++++++++++++++++++++++++++++++++++
  include/linux/thread_info.h | 64 +--------------------------------------
- 2 files changed, 75 insertions(+), 63 deletions(-)
+ 3 files changed, 76 insertions(+), 63 deletions(-)
  create mode 100644 include/linux/thread_bits.h
 
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index d2588263a..e5a17a334 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -27,6 +27,7 @@
+ #include <linux/signal_types.h>
+ #include <linux/mm_types_task.h>
+ #include <linux/task_io_accounting.h>
++#include <linux/thread_bits.h>
+ 
+ /* task_struct member predeclarations (sorted alphabetically): */
+ struct audit_context;
 diff --git a/include/linux/thread_bits.h b/include/linux/thread_bits.h
 new file mode 100644
-index 0000000..473799a
+index 000000000..473799ac4
 --- /dev/null
 +++ b/include/linux/thread_bits.h
 @@ -0,0 +1,74 @@
@@ -98,10 +111,10 @@ index 0000000..473799a
 +#endif /* !__ASSEMBLY__ */
 +#endif /* _LINUX_THREAD_BITS_H */
 diff --git a/include/linux/thread_info.h b/include/linux/thread_info.h
-index d7d3ea6..1ae327a 100644
+index 34f053a15..793ab9b29 100644
 --- a/include/linux/thread_info.h
 +++ b/include/linux/thread_info.h
-@@ -10,30 +10,9 @@
+@@ -11,30 +11,9 @@
  #include <linux/types.h>
  #include <linux/bug.h>
  #include <linux/restart_block.h>
@@ -133,8 +146,8 @@ index d7d3ea6..1ae327a 100644
  #include <asm/thread_info.h>
  
  #ifdef __KERNEL__
-@@ -45,47 +24,6 @@ enum {
- # define THREADINFO_GFP		(GFP_KERNEL_ACCOUNT | __GFP_NOTRACK)
+@@ -49,47 +28,6 @@ enum {
+ # define THREADINFO_GFP		(GFP_KERNEL_ACCOUNT)
  #endif
  
 -/*
@@ -182,5 +195,5 @@ index d7d3ea6..1ae327a 100644
  
  #ifndef CONFIG_HAVE_ARCH_WITHIN_STACK_FRAMES
 -- 
-2.6.4
+2.11.1
 

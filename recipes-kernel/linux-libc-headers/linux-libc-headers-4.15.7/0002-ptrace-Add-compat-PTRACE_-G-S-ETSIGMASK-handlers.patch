@@ -1,7 +1,7 @@
-From c0ef64eda9344a121dca7add1e72faf78785c215 Mon Sep 17 00:00:00 2001
+From 6bae7e33d2844a0cee5622c42baceead801ec3b4 Mon Sep 17 00:00:00 2001
 From: James Morse <james.morse@arm.com>
 Date: Thu, 29 Jun 2017 17:26:37 +0100
-Subject: [PATCH 01/25] ptrace: Add compat PTRACE_{G,S}ETSIGMASK handlers
+Subject: [PATCH 02/25] ptrace: Add compat PTRACE_{G,S}ETSIGMASK handlers
 
 compat_ptrace_request() lacks handlers for PTRACE_{G,S}ETSIGMASK,
 instead using those in ptrace_request(). The compat variant should
@@ -20,20 +20,23 @@ significant u32 where it expected the least significant.
 Instead of duplicating ptrace_request()s code as a special case in
 the arch code, handle it here.
 
-CC: Yury Norov <ynorov@caviumnetworks.com>
+Fixes: 29000caecbe87 ("ptrace: add ability to get/set signal-blocked mask")
 CC: Andrey Vagin <avagin@openvz.org>
 Reported-by: Zhou Chengming <zhouchengming1@huawei.com>
 Signed-off-by: James Morse <james.morse@arm.com>
-Fixes: 29000caecbe87 ("ptrace: add ability to get/set signal-blocked mask")
+
+Yury:
+Replace sigset_{to,from}_compat() with new {get,put}_compat_sigset()
+Signed-off-by: Yury Norov <ynorov@caviumnetworks.com>
 ---
- kernel/ptrace.c | 52 ++++++++++++++++++++++++++++++++++++++++------------
- 1 file changed, 40 insertions(+), 12 deletions(-)
+ kernel/ptrace.c | 49 +++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 37 insertions(+), 12 deletions(-)
 
 diff --git a/kernel/ptrace.c b/kernel/ptrace.c
-index 60f356d..6495b5b 100644
+index 84b136793..a7786b34b 100644
 --- a/kernel/ptrace.c
 +++ b/kernel/ptrace.c
-@@ -882,6 +882,22 @@ static int ptrace_regset(struct task_struct *task, int req, unsigned int type,
+@@ -880,6 +880,22 @@ static int ptrace_regset(struct task_struct *task, int req, unsigned int type,
  EXPORT_SYMBOL_GPL(task_user_regset_view);
  #endif
  
@@ -56,7 +59,7 @@ index 60f356d..6495b5b 100644
  int ptrace_request(struct task_struct *child, long request,
  		   unsigned long addr, unsigned long data)
  {
-@@ -953,18 +969,7 @@ int ptrace_request(struct task_struct *child, long request,
+@@ -951,18 +967,7 @@ int ptrace_request(struct task_struct *child, long request,
  			break;
  		}
  
@@ -76,7 +79,7 @@ index 60f356d..6495b5b 100644
  		break;
  	}
  
-@@ -1193,7 +1198,9 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
+@@ -1191,7 +1196,9 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
  			  compat_ulong_t addr, compat_ulong_t data)
  {
  	compat_ulong_t __user *datap = compat_ptr(data);
@@ -86,7 +89,7 @@ index 60f356d..6495b5b 100644
  	siginfo_t siginfo;
  	int ret;
  
-@@ -1235,6 +1242,27 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
+@@ -1233,6 +1240,24 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
  		else
  			ret = ptrace_setsiginfo(child, &siginfo);
  		break;
@@ -94,26 +97,23 @@ index 60f356d..6495b5b 100644
 +		if (addr != sizeof(compat_sigset_t))
 +			return -EINVAL;
 +
-+		sigset_to_compat(&set32, &child->blocked);
-+
-+		if (copy_to_user(datap, &set32, sizeof(set32)))
-+			return -EFAULT;
-+
-+		ret = 0;
++		ret = put_compat_sigset((compat_sigset_t __user *) datap,
++				&child->blocked, sizeof(compat_sigset_t));
 +		break;
 +	case PTRACE_SETSIGMASK:
 +		if (addr != sizeof(compat_sigset_t))
 +			return -EINVAL;
 +
-+		if (copy_from_user(&set32, datap, sizeof(compat_sigset_t)))
-+			return -EFAULT;
++		ret = get_compat_sigset(&new_set,
++				(compat_sigset_t __user *) datap);
++		if (ret)
++			break;
 +
-+		sigset_from_compat(&new_set, &set32);
 +		ret = ptrace_setsigmask(child, &new_set);
 +		break;
  #ifdef CONFIG_HAVE_ARCH_TRACEHOOK
  	case PTRACE_GETREGSET:
  	case PTRACE_SETREGSET:
 -- 
-2.6.4
+2.11.1
 

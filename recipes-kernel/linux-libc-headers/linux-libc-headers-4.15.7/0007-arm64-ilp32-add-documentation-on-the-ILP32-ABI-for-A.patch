@@ -1,7 +1,7 @@
-From e055b3b5c89b6f3d3b8500c827a3c84bba3d1b54 Mon Sep 17 00:00:00 2001
+From fe8137f790f1a518ad9907600b5cb1649abb1d5d Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Tue, 24 May 2016 03:04:37 +0300
-Subject: [PATCH 05/25] arm64: ilp32: add documentation on the ILP32 ABI for
+Subject: [PATCH 07/25] arm64: ilp32: add documentation on the ILP32 ABI for
  ARM64
 
 Based on Andrew Pinski's patch-series.
@@ -14,7 +14,7 @@ Signed-off-by: Yury Norov <ynorov@caviumnetworks.com>
 
 diff --git a/Documentation/arm64/ilp32.txt b/Documentation/arm64/ilp32.txt
 new file mode 100644
-index 0000000..08935a3
+index 000000000..08935a34e
 --- /dev/null
 +++ b/Documentation/arm64/ilp32.txt
 @@ -0,0 +1,45 @@
@@ -64,5 +64,5 @@ index 0000000..08935a3
 +
 +elf_gregset_t is taken from lp64 to handle registers properly.
 -- 
-2.6.4
+2.11.1
 

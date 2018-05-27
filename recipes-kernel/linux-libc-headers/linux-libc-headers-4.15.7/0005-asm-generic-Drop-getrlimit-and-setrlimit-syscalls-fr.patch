@@ -1,7 +1,7 @@
-From 1f4217ca72df84a378c4f6db109d06619e6ea01d Mon Sep 17 00:00:00 2001
+From 8aad2bbc1838030285a8f3b5897df4b8fac3585b Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Sat, 22 Oct 2016 13:45:06 +0300
-Subject: [PATCH 04/25] asm-generic: Drop getrlimit and setrlimit syscalls from
+Subject: [PATCH 05/25] asm-generic: Drop getrlimit and setrlimit syscalls from
  default list
 
 The newer prlimit64 syscall provides all the functionality provided by
@@ -62,10 +62,10 @@ Acked-by: Vineet Gupta <vgupta@synopsys.com> #arch/arc bits
  13 files changed, 21 insertions(+)
 
 diff --git a/arch/arc/include/uapi/asm/unistd.h b/arch/arc/include/uapi/asm/unistd.h
-index 9a34136..ac64965 100644
+index 517178b1d..660dbb2e7 100644
 --- a/arch/arc/include/uapi/asm/unistd.h
 +++ b/arch/arc/include/uapi/asm/unistd.h
-@@ -16,6 +16,7 @@
+@@ -17,6 +17,7 @@
  #define _UAPI_ASM_ARC_UNISTD_H
  
  #define __ARCH_WANT_RENAMEAT
@@ -74,10 +74,10 @@ index 9a34136..ac64965 100644
  #define __ARCH_WANT_SYS_CLONE
  #define __ARCH_WANT_SYS_VFORK
 diff --git a/arch/arm64/include/uapi/asm/unistd.h b/arch/arm64/include/uapi/asm/unistd.h
-index 043d17a..48355a6 100644
+index 5072cbd15..439b1c55c 100644
 --- a/arch/arm64/include/uapi/asm/unistd.h
 +++ b/arch/arm64/include/uapi/asm/unistd.h
-@@ -15,5 +15,6 @@
+@@ -16,5 +16,6 @@
   */
  
  #define __ARCH_WANT_RENAMEAT
@@ -85,10 +85,10 @@ index 043d17a..48355a6 100644
  
  #include <asm-generic/unistd.h>
 diff --git a/arch/c6x/include/uapi/asm/unistd.h b/arch/c6x/include/uapi/asm/unistd.h
-index 12d73d9..f676231 100644
+index 0d2daf7f9..df40dc128 100644
 --- a/arch/c6x/include/uapi/asm/unistd.h
 +++ b/arch/c6x/include/uapi/asm/unistd.h
-@@ -15,6 +15,7 @@
+@@ -16,6 +16,7 @@
   */
  
  #define __ARCH_WANT_RENAMEAT
@@ -97,7 +97,7 @@ index 12d73d9..f676231 100644
  
  /* Use the standard ABI for syscalls. */
 diff --git a/arch/h8300/include/uapi/asm/unistd.h b/arch/h8300/include/uapi/asm/unistd.h
-index 7dd20ef..2f98394 100644
+index 7dd20ef76..2f98394b7 100644
 --- a/arch/h8300/include/uapi/asm/unistd.h
 +++ b/arch/h8300/include/uapi/asm/unistd.h
 @@ -1,5 +1,6 @@
@@ -108,10 +108,10 @@ index 7dd20ef..2f98394 100644
  
  #include <asm-generic/unistd.h>
 diff --git a/arch/hexagon/include/uapi/asm/unistd.h b/arch/hexagon/include/uapi/asm/unistd.h
-index 2151760..52d585c 100644
+index ea181e791..c9eb56ed5 100644
 --- a/arch/hexagon/include/uapi/asm/unistd.h
 +++ b/arch/hexagon/include/uapi/asm/unistd.h
-@@ -28,6 +28,7 @@
+@@ -29,6 +29,7 @@
  
  #define sys_mmap2 sys_mmap_pgoff
  #define __ARCH_WANT_RENAMEAT
@@ -120,10 +120,10 @@ index 2151760..52d585c 100644
  #define __ARCH_WANT_SYS_CLONE
  #define __ARCH_WANT_SYS_VFORK
 diff --git a/arch/metag/include/uapi/asm/unistd.h b/arch/metag/include/uapi/asm/unistd.h
-index 459b6ec..16b5cb3 100644
+index 9f72c4cfc..ca3443587 100644
 --- a/arch/metag/include/uapi/asm/unistd.h
 +++ b/arch/metag/include/uapi/asm/unistd.h
-@@ -8,6 +8,7 @@
+@@ -9,6 +9,7 @@
   */
  
  #define __ARCH_WANT_RENAMEAT
@@ -132,10 +132,10 @@ index 459b6ec..16b5cb3 100644
  /* Use the standard ABI for syscalls. */
  #include <asm-generic/unistd.h>
 diff --git a/arch/nios2/include/uapi/asm/unistd.h b/arch/nios2/include/uapi/asm/unistd.h
-index 51a32c7..b0dda4d 100644
+index b6bdae04b..aa4e90e00 100644
 --- a/arch/nios2/include/uapi/asm/unistd.h
 +++ b/arch/nios2/include/uapi/asm/unistd.h
-@@ -18,6 +18,7 @@
+@@ -19,6 +19,7 @@
   #define sys_mmap2 sys_mmap_pgoff
  
  #define __ARCH_WANT_RENAMEAT
@@ -144,10 +144,10 @@ index 51a32c7..b0dda4d 100644
  /* Use the standard ABI for syscalls */
  #include <asm-generic/unistd.h>
 diff --git a/arch/openrisc/include/uapi/asm/unistd.h b/arch/openrisc/include/uapi/asm/unistd.h
-index 471905b..6812d81 100644
+index 9a3ee3896..8e838aa4f 100644
 --- a/arch/openrisc/include/uapi/asm/unistd.h
 +++ b/arch/openrisc/include/uapi/asm/unistd.h
-@@ -21,6 +21,7 @@
+@@ -22,6 +22,7 @@
  #define sys_mmap2 sys_mmap_pgoff
  
  #define __ARCH_WANT_RENAMEAT
@@ -156,10 +156,10 @@ index 471905b..6812d81 100644
  #define __ARCH_WANT_SYS_CLONE
  
 diff --git a/arch/score/include/uapi/asm/unistd.h b/arch/score/include/uapi/asm/unistd.h
-index d4008c3..7ad1bdc 100644
+index 04da47bd3..a64e6f131 100644
 --- a/arch/score/include/uapi/asm/unistd.h
 +++ b/arch/score/include/uapi/asm/unistd.h
-@@ -1,6 +1,7 @@
+@@ -2,6 +2,7 @@
  #define __ARCH_HAVE_MMU
  
  #define __ARCH_WANT_RENAMEAT
@@ -168,10 +168,10 @@ index d4008c3..7ad1bdc 100644
  #define __ARCH_WANT_SYSCALL_NO_FLAGS
  #define __ARCH_WANT_SYSCALL_OFF_T
 diff --git a/arch/tile/include/uapi/asm/unistd.h b/arch/tile/include/uapi/asm/unistd.h
-index 24e9187..cf0505f 100644
+index 1a169ec92..57ab278fe 100644
 --- a/arch/tile/include/uapi/asm/unistd.h
 +++ b/arch/tile/include/uapi/asm/unistd.h
-@@ -13,6 +13,7 @@
+@@ -14,6 +14,7 @@
   */
  
  #define __ARCH_WANT_RENAMEAT
@@ -180,10 +180,10 @@ index 24e9187..cf0505f 100644
  /* Use the flavor of this syscall that matches the 32-bit API better. */
  #define __ARCH_WANT_SYNC_FILE_RANGE2
 diff --git a/arch/unicore32/include/uapi/asm/unistd.h b/arch/unicore32/include/uapi/asm/unistd.h
-index 1f63c47..ef25aec 100644
+index 65856eaab..0314f7894 100644
 --- a/arch/unicore32/include/uapi/asm/unistd.h
 +++ b/arch/unicore32/include/uapi/asm/unistd.h
-@@ -11,6 +11,7 @@
+@@ -12,6 +12,7 @@
   */
  
  #define __ARCH_WANT_RENAMEAT
@@ -192,10 +192,10 @@ index 1f63c47..ef25aec 100644
  /* Use the standard ABI for syscalls. */
  #include <asm-generic/unistd.h>
 diff --git a/include/uapi/asm-generic/unistd.h b/include/uapi/asm-generic/unistd.h
-index 429dd33..ef90d53 100644
+index 426a1a496..a460e9a9b 100644
 --- a/include/uapi/asm-generic/unistd.h
 +++ b/include/uapi/asm-generic/unistd.h
-@@ -464,10 +464,15 @@ __SYSCALL(__NR_uname, sys_newuname)
+@@ -465,10 +465,15 @@ __SYSCALL(__NR_uname, sys_newuname)
  __SYSCALL(__NR_sethostname, sys_sethostname)
  #define __NR_setdomainname 162
  __SYSCALL(__NR_setdomainname, sys_setdomainname)
@@ -212,10 +212,10 @@ index 429dd33..ef90d53 100644
  __SC_COMP(__NR_getrusage, sys_getrusage, compat_sys_getrusage)
  #define __NR_umask 166
 diff --git a/scripts/checksyscalls.sh b/scripts/checksyscalls.sh
-index 116b773..7a6360b 100755
+index ee3dfb5be..5717766c5 100755
 --- a/scripts/checksyscalls.sh
 +++ b/scripts/checksyscalls.sh
-@@ -37,6 +37,11 @@ cat << EOF
+@@ -38,6 +38,11 @@ cat << EOF
  #define __IGNORE_lstat64	/* fstatat64 */
  #endif
  
@@ -228,5 +228,5 @@ index 116b773..7a6360b 100755
  #define __IGNORE_renameat	/* renameat2 */
  
 -- 
-2.6.4
+2.11.1
 

@@ -1,7 +1,7 @@
-From 35beb307ce6037aa230f75176ba9b0de0d10d885 Mon Sep 17 00:00:00 2001
+From 587fbbb6f2bfd2724c6a341d937aaea2334d5fdc Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Tue, 29 Dec 2015 12:26:34 +0300
-Subject: [PATCH 02/25] compat ABI: use non-compat openat and open_by_handle_at
+Subject: [PATCH 03/25] compat ABI: use non-compat openat and open_by_handle_at
  variants
 
 The only difference is that non-compat version forces O_LARGEFILE,
@@ -19,7 +19,7 @@ Acked-by: Chris Metcalf <cmetcalf@ezchip.com> [for tile]
  2 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/arch/tile/kernel/compat.c b/arch/tile/kernel/compat.c
-index bdaf71d..3b7853c 100644
+index bdaf71d31..3b7853c59 100644
 --- a/arch/tile/kernel/compat.c
 +++ b/arch/tile/kernel/compat.c
 @@ -103,6 +103,9 @@ COMPAT_SYSCALL_DEFINE5(llseek, unsigned int, fd, unsigned int, offset_high,
@@ -33,10 +33,10 @@ index bdaf71d..3b7853c 100644
  #define compat_sys_rt_sigreturn _compat_sys_rt_sigreturn
  #define sys_clone _sys_clone
 diff --git a/include/uapi/asm-generic/unistd.h b/include/uapi/asm-generic/unistd.h
-index 061185a..429dd33 100644
+index 8b87de067..426a1a496 100644
 --- a/include/uapi/asm-generic/unistd.h
 +++ b/include/uapi/asm-generic/unistd.h
-@@ -178,7 +178,7 @@ __SYSCALL(__NR_fchownat, sys_fchownat)
+@@ -179,7 +179,7 @@ __SYSCALL(__NR_fchownat, sys_fchownat)
  #define __NR_fchown 55
  __SYSCALL(__NR_fchown, sys_fchown)
  #define __NR_openat 56
@@ -45,7 +45,7 @@ index 061185a..429dd33 100644
  #define __NR_close 57
  __SYSCALL(__NR_close, sys_close)
  #define __NR_vhangup 58
-@@ -675,8 +675,7 @@ __SYSCALL(__NR_fanotify_mark, sys_fanotify_mark)
+@@ -676,8 +676,7 @@ __SYSCALL(__NR_fanotify_mark, sys_fanotify_mark)
  #define __NR_name_to_handle_at         264
  __SYSCALL(__NR_name_to_handle_at, sys_name_to_handle_at)
  #define __NR_open_by_handle_at         265
@@ -56,5 +56,5 @@ index 061185a..429dd33 100644
  __SC_COMP(__NR_clock_adjtime, sys_clock_adjtime, compat_sys_clock_adjtime)
  #define __NR_syncfs 267
 -- 
-2.6.4
+2.11.1
 

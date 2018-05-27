@@ -1,4 +1,4 @@
-From 2cc297e2e931ac4b8449726052ca0dceef6f82c0 Mon Sep 17 00:00:00 2001
+From 31e3310ade1b51938b14ef915d3b26baef9e0504 Mon Sep 17 00:00:00 2001
 From: Yury Norov <ynorov@caviumnetworks.com>
 Date: Thu, 22 Jun 2017 14:16:06 +0300
 Subject: [PATCH 14/25] arm64: change compat_elf_hwcap and compat_elf_hwcap2
@@ -18,7 +18,7 @@ Signed-off-by: Yury Norov <ynorov@caviumnetworks.com>
  5 files changed, 16 insertions(+), 16 deletions(-)
 
 diff --git a/arch/arm64/include/asm/hwcap.h b/arch/arm64/include/asm/hwcap.h
-index 99dfd92..428b745 100644
+index 99dfd9277..428b745b5 100644
 --- a/arch/arm64/include/asm/hwcap.h
 +++ b/arch/arm64/include/asm/hwcap.h
 @@ -47,7 +47,7 @@
@@ -31,10 +31,10 @@ index 99dfd92..428b745 100644
  
  enum {
 diff --git a/arch/arm64/kernel/binfmt_elf32.c b/arch/arm64/kernel/binfmt_elf32.c
-index ff1f192..955aec3 100644
+index d487d19ef..3efa59f5f 100644
 --- a/arch/arm64/kernel/binfmt_elf32.c
 +++ b/arch/arm64/kernel/binfmt_elf32.c
-@@ -19,8 +19,8 @@
+@@ -18,8 +18,8 @@
   })
  
  #define COMPAT_ARCH_DLINFO
@@ -46,10 +46,10 @@ index ff1f192..955aec3 100644
  #define compat_arch_setup_additional_pages \
  					aarch32_setup_vectors_page
 diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
-index 5b9e849..0400993 100644
+index 1c0fc3391..ce2550c72 100644
 --- a/arch/arm64/kernel/cpufeature.c
 +++ b/arch/arm64/kernel/cpufeature.c
-@@ -37,15 +37,15 @@ unsigned long elf_hwcap __read_mostly;
+@@ -38,15 +38,15 @@ unsigned long elf_hwcap __read_mostly;
  EXPORT_SYMBOL_GPL(elf_hwcap);
  
  #ifdef CONFIG_AARCH32_EL0
@@ -68,7 +68,7 @@ index 5b9e849..0400993 100644
  #endif
  
  DECLARE_BITMAP(cpu_hwcaps, ARM64_NCAPS);
-@@ -920,10 +920,10 @@ static void __init cap_set_elf_hwcap(const struct arm64_cpu_capabilities *cap)
+@@ -1118,10 +1118,10 @@ static void __init cap_set_elf_hwcap(const struct arm64_cpu_capabilities *cap)
  		break;
  #ifdef CONFIG_AARCH32_EL0
  	case CAP_COMPAT_HWCAP:
@@ -81,7 +81,7 @@ index 5b9e849..0400993 100644
  		break;
  #endif
  	default:
-@@ -943,10 +943,10 @@ static bool cpus_have_elf_hwcap(const struct arm64_cpu_capabilities *cap)
+@@ -1141,10 +1141,10 @@ static bool cpus_have_elf_hwcap(const struct arm64_cpu_capabilities *cap)
  		break;
  #ifdef CONFIG_AARCH32_EL0
  	case CAP_COMPAT_HWCAP:
@@ -95,10 +95,10 @@ index 5b9e849..0400993 100644
  #endif
  	default:
 diff --git a/arch/arm64/kernel/cpuinfo.c b/arch/arm64/kernel/cpuinfo.c
-index 024d7e8..b64ad0c 100644
+index 1d3ae8dd0..2e8eabf96 100644
 --- a/arch/arm64/kernel/cpuinfo.c
 +++ b/arch/arm64/kernel/cpuinfo.c
-@@ -111,7 +111,7 @@ static const char *const compat_hwcap2_str[] = {
+@@ -119,7 +119,7 @@ static const char *const compat_hwcap2_str[] = {
  static int c_show(struct seq_file *m, void *v)
  {
  	int i, j;
@@ -107,7 +107,7 @@ index 024d7e8..b64ad0c 100644
  
  	for_each_online_cpu(i) {
  		struct cpuinfo_arm64 *cpuinfo = &per_cpu(cpu_data, i);
-@@ -123,7 +123,7 @@ static int c_show(struct seq_file *m, void *v)
+@@ -131,7 +131,7 @@ static int c_show(struct seq_file *m, void *v)
  		 * "processor".  Give glibc what it expects.
  		 */
  		seq_printf(m, "processor\t: %d\n", i);
@@ -116,7 +116,7 @@ index 024d7e8..b64ad0c 100644
  			seq_printf(m, "model name\t: ARMv8 Processor rev %d (%s)\n",
  				   MIDR_REVISION(midr), COMPAT_ELF_PLATFORM);
  
-@@ -138,14 +138,14 @@ static int c_show(struct seq_file *m, void *v)
+@@ -146,14 +146,14 @@ static int c_show(struct seq_file *m, void *v)
  		 * software which does already (at least for 32-bit).
  		 */
  		seq_puts(m, "Features\t:");
@@ -135,18 +135,18 @@ index 024d7e8..b64ad0c 100644
  #endif /* CONFIG_AARCH32_EL0 */
  		} else {
 diff --git a/drivers/clocksource/arm_arch_timer.c b/drivers/clocksource/arm_arch_timer.c
-index 859e2984..8c87daf 100644
+index c3c6a8d48..d8b12b9be 100644
 --- a/drivers/clocksource/arm_arch_timer.c
 +++ b/drivers/clocksource/arm_arch_timer.c
-@@ -734,7 +734,7 @@ static void arch_timer_evtstrm_enable(int divider)
+@@ -765,7 +765,7 @@ static void arch_timer_evtstrm_enable(int divider)
  	arch_timer_set_cntkctl(cntkctl);
  	elf_hwcap |= HWCAP_EVTSTRM;
  #ifdef CONFIG_AARCH32_EL0
 -	compat_elf_hwcap |= COMPAT_HWCAP_EVTSTRM;
 +	a32_elf_hwcap |= COMPAT_HWCAP_EVTSTRM;
  #endif
+ 	cpumask_set_cpu(smp_processor_id(), &evtstrm_available);
  }
- 
 -- 
-2.6.4
+2.11.1
 

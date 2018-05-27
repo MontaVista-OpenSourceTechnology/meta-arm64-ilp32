@@ -1,7 +1,7 @@
-From 8e553c732ba90ff1101eba570276f3f307f50360 Mon Sep 17 00:00:00 2001
+From 6f8a7bead62399e10e55f9fd003345c5ff1e9324 Mon Sep 17 00:00:00 2001
 From: Andrew Pinski <apinski@cavium.com>
 Date: Tue, 24 May 2016 03:04:40 +0300
-Subject: [PATCH 09/25] arm64:uapi: set __BITS_PER_LONG correctly for ILP32 and
+Subject: [PATCH 10/25] arm64:uapi: set __BITS_PER_LONG correctly for ILP32 and
  LP64
 
 Define __BITS_PER_LONG depending on the ABI used (i.e. check whether
@@ -18,10 +18,10 @@ Reviewed-by: David Daney <ddaney@caviumnetworks.com>
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/include/uapi/asm/bitsperlong.h b/arch/arm64/include/uapi/asm/bitsperlong.h
-index fce9c29..4265243 100644
+index 485d60bee..9a05a9659 100644
 --- a/arch/arm64/include/uapi/asm/bitsperlong.h
 +++ b/arch/arm64/include/uapi/asm/bitsperlong.h
-@@ -16,7 +16,14 @@
+@@ -17,7 +17,14 @@
  #ifndef __ASM_BITSPERLONG_H
  #define __ASM_BITSPERLONG_H
  
@@ -38,5 +38,5 @@ index fce9c29..4265243 100644
  #include <asm-generic/bitsperlong.h>
  
 -- 
-2.6.4
+2.11.1
 

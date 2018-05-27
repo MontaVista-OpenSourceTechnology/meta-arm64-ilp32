@@ -1,0 +1,30 @@
+From 669ea9f9f73579be4a1b9ef9d4400703df6409d6 Mon Sep 17 00:00:00 2001
+From: Catalin Marinas <catalin.marinas@arm.com>
+Date: Thu, 15 Mar 2018 16:54:33 +0000
+Subject: [PATCH 25/25] ptrace: Remove unused set32 variable
+
+Commit 6f34d21d0824 ("ptrace: Add compat PTRACE_{G,S}ETSIGMASK
+handlers") replaced sigset_{to,from}_compat() with the new
+{get,put}_compat_sigset() but left a variable unused.
+
+Fixes: 6f34d21d0824 ("ptrace: Add compat PTRACE_{G,S}ETSIGMASK handlers")
+Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+---
+ kernel/ptrace.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/kernel/ptrace.c b/kernel/ptrace.c
+index a7786b34b..672c99402 100644
+--- a/kernel/ptrace.c
++++ b/kernel/ptrace.c
+@@ -1196,7 +1196,6 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
+ 			  compat_ulong_t addr, compat_ulong_t data)
+ {
+ 	compat_ulong_t __user *datap = compat_ptr(data);
+-	compat_sigset_t set32;
+ 	compat_ulong_t word;
+ 	sigset_t new_set;
+ 	siginfo_t siginfo;
+-- 
+2.11.1
+
