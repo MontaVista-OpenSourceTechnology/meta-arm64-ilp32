@@ -1,7 +1,7 @@
-From a920ac7b17fdfb2f98bb72e0bd4177a890f245cc Mon Sep 17 00:00:00 2001
-From: Steve Ellcey <sellcey@caviumnetworks.com>
-Date: Mon, 14 Aug 2017 15:16:05 +0100
-Subject: [PATCH 02/10] aarch64: Add ILP32 support
+From f2641176c829a9760a80eedc74689eb7c325e2ba Mon Sep 17 00:00:00 2001
+From: Steve Ellcey <sellcey@caviumnetworks.com> 
+Date: Mon, 28 May 2018 02:09:44 +0000
+Subject: [PATCH] aarch64: Add ILP32 support
 
 Add support for the ILP32 abi variant to aarch64.
 
@@ -127,7 +127,7 @@ index c2c010f97b..5083a41ba7 100644
      case FLAG_ARM_LIBSF:
        fputs (",soft-float", stdout);
 diff --git a/sysdeps/aarch64/configure b/sysdeps/aarch64/configure
-index 5bd355a691..7dd56e8643 100644
+index 3bc5537bc0..57db80fdd3 100644
 --- a/sysdeps/aarch64/configure
 +++ b/sysdeps/aarch64/configure
 @@ -163,12 +163,19 @@ rm -f conftest*
@@ -155,11 +155,11 @@ index 5bd355a691..7dd56e8643 100644
 +config_vars="$config_vars
 +default-abi = ${aarch64_config_abi}${libc_aarch64_be}"
 diff --git a/sysdeps/aarch64/configure.ac b/sysdeps/aarch64/configure.ac
-index 7851dd4dac..90693252a3 100644
+index 6e9238171f..eceac52bb2 100644
 --- a/sysdeps/aarch64/configure.ac
 +++ b/sysdeps/aarch64/configure.ac
 @@ -14,9 +14,16 @@ AC_CACHE_CHECK([for big endian],
-                       yes
+                       is_aarch64_be
                       #endif
    ], libc_cv_aarch64_be=yes, libc_cv_aarch64_be=no)])
 +
