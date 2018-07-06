@@ -1,7 +1,7 @@
-From 2c5e2ba3ced851a18c488c630abd00ca99523bbd Mon Sep 17 00:00:00 2001
-From: Yao Qi <yao.qi@linaro.org>
-Date: Mon, 23 Oct 2017 14:50:18 +0100
-Subject: [PATCH 1950/1951] ILP32: BFD
+From 3238cc8d71d61bb1a719443b6ecfe18d2456dcc1 Mon Sep 17 00:00:00 2001
+From: Jeremy Puhlman <jpuhlman@mvista.com>
+Date: Fri, 6 Jul 2018 17:34:24 +0000
+Subject: [PATCH] ILP32: BFD
 
 bfd:
 
@@ -17,41 +17,65 @@ bfd:
 	size and offset of ILP32 executables.
 	(_bfd_aarch64_elf_grok_psinfo):  Ditto.
 
+V2 Changes:
+	* cpu-aarch64.c (compatible):
+	Don't reject different mach or ILP32 here.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_private_bfd_data):
+	Add an error message on why endianess is rejected.
+	Reject different ILP32/LP64 settings.
+
 Upstream-Status: Backport [https://sourceware.org/git/?p=binutils-gdb.git;a=shortlog;h=refs/heads/users/linaro/gdb-aarch64-ilp32]
 
+Signed-off-by: Andrew Pinski <apinski@cavium.com>
+Signed-off-by: Steve Ellcey  <sellcey@cavium.com>
+Signed-off-by: Manjunath Matti <mmatti@mvista.com>
 ---
- bfd/cpu-aarch64.c   |  7 ++-----
+ bfd/cpu-aarch64.c   | 28 +++-------------------------
  bfd/elfnn-aarch64.c | 17 ++++++++++++++++-
  bfd/elfxx-aarch64.c | 43 ++++++++++++++++++++++++++++++++++++++-----
- 3 files changed, 56 insertions(+), 11 deletions(-)
+ 3 files changed, 57 insertions(+), 31 deletions(-)
 
 diff --git a/bfd/cpu-aarch64.c b/bfd/cpu-aarch64.c
-index 7cb81f343c..63fba48a9c 100644
+index 44cee6c..2e84ec7 100644
 --- a/bfd/cpu-aarch64.c
 +++ b/bfd/cpu-aarch64.c
-@@ -25,7 +25,8 @@
+@@ -34,31 +34,9 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
+   if (a->arch != b->arch)
+     return NULL;
  
- /* This routine is provided two arch_infos and works out which Aarch64
-    machine which would be compatible with both and returns a pointer
--   to its info structure.  */
-+   to its info structure.  ABI (ilp32 vs. lp64) and endianness compatibility
-+   are checked in elfNN_aarch64_merge_private_bfd_data.  */
- 
- static const bfd_arch_info_type *
- compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
-@@ -38,10 +39,6 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
-   if (a->mach == b->mach)
-     return a;
- 
+-  /* If a & b are for the same machine then all is well.  */
+-  if (a->mach == b->mach)
+-    return a;
+-
 -  /* Don't allow mixing ilp32 with lp64.  */
 -  if ((a->mach & bfd_mach_aarch64_ilp32) != (b->mach & bfd_mach_aarch64_ilp32))
 -    return NULL;
 -
-   /* Otherwise if either a or b is the 'default' machine
-      then it can be polymorphed into the other.  */
-   if (a->the_default)
+-  /* Otherwise if either a or b is the 'default' machine
+-     then it can be polymorphed into the other.  */
+-  if (a->the_default)
+-    return b;
+-
+-  if (b->the_default)
+-    return a;
+-
+-  /* So far all newer cores are
+-     supersets of previous cores.  */
+-  if (a->mach < b->mach)
+-    return b;
+-  else if (a->mach > b->mach)
+-    return a;
+-
+-  /* Never reached!  */
+-  return NULL;
++  /* Machine compatibility is checked in
++     elfNN_aarch64_merge_private_bfd_data.  */
++  return a;
+ }
+ 
+ static struct
 diff --git a/bfd/elfnn-aarch64.c b/bfd/elfnn-aarch64.c
-index 23c881c51d..1eede2afe8 100644
+index d5711e0..0ac03e0 100644
 --- a/bfd/elfnn-aarch64.c
 +++ b/bfd/elfnn-aarch64.c
 @@ -6591,11 +6591,26 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
@@ -62,7 +86,7 @@ index 23c881c51d..1eede2afe8 100644
 +    {
 +      (*_bfd_error_handler)
 +	(_("%B: endianness incompatible with that of the selected emulation"),
-+	   ibfd);
++	 ibfd);
 +      return FALSE;
 +    }
  
@@ -83,7 +107,7 @@ index 23c881c51d..1eede2afe8 100644
    /* The following seems bogus to me -- The flags are initialized in
       the assembler but I don't think an elf_flags_init field is
 diff --git a/bfd/elfxx-aarch64.c b/bfd/elfxx-aarch64.c
-index 10ee5fa99e..f52e0f117c 100644
+index 9d4aa8f..66950d8 100644
 --- a/bfd/elfxx-aarch64.c
 +++ b/bfd/elfxx-aarch64.c
 @@ -548,7 +548,18 @@ _bfd_aarch64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
@@ -141,7 +165,7 @@ index 10ee5fa99e..f52e0f117c 100644
      default:
        return FALSE;
  
--    case 136:        /* This is sizeof(struct elf_prpsinfo) on Linux/aarch64.  */
+-    case 136:	     /* This is sizeof(struct elf_prpsinfo) on Linux/aarch64.  */
 +    case 124:         /* sizeof(struct elf_prpsinfo) on Linux/aarch64 ilp32.  */
 +      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 12);
 +      elf_tdata (abfd)->core->program
