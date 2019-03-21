@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-4.12:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-4.18:"
 
 # merged patches on top of yocto-linux-4.12 from:
 # URI: git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git
