@@ -29,17 +29,11 @@ Upstream-Status: Backport [https://sourceware.org/git/?p=binutils-gdb.git;a=shor
 Signed-off-by: Andrew Pinski <apinski@cavium.com>
 Signed-off-by: Steve Ellcey  <sellcey@cavium.com>
 Signed-off-by: Manjunath Matti <mmatti@mvista.com>
----
- bfd/cpu-aarch64.c   | 28 +++-------------------------
- bfd/elfnn-aarch64.c | 17 ++++++++++++++++-
- bfd/elfxx-aarch64.c | 43 ++++++++++++++++++++++++++++++++++++++-----
- 3 files changed, 57 insertions(+), 31 deletions(-)
 
-diff --git a/bfd/cpu-aarch64.c b/bfd/cpu-aarch64.c
-index 44cee6c..2e84ec7 100644
---- a/bfd/cpu-aarch64.c
-+++ b/bfd/cpu-aarch64.c
-@@ -34,31 +34,9 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
+diff -Naurp gdb-8.2_org/bfd/cpu-aarch64.c gdb-8.2/bfd/cpu-aarch64.c
+--- gdb-8.2_org/bfd/cpu-aarch64.c	2018-01-04 20:07:23.000000000 -0800
++++ gdb-8.2/bfd/cpu-aarch64.c	2019-03-21 00:05:01.610872053 -0700
+@@ -34,31 +34,9 @@ compatible (const bfd_arch_info_type * a
    if (a->arch != b->arch)
      return NULL;
  
@@ -74,11 +68,10 @@ index 44cee6c..2e84ec7 100644
  }
  
  static struct
-diff --git a/bfd/elfnn-aarch64.c b/bfd/elfnn-aarch64.c
-index d5711e0..0ac03e0 100644
---- a/bfd/elfnn-aarch64.c
-+++ b/bfd/elfnn-aarch64.c
-@@ -6591,11 +6591,26 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
+diff -Naurp gdb-8.2_org/bfd/elfnn-aarch64.c gdb-8.2/bfd/elfnn-aarch64.c
+--- gdb-8.2_org/bfd/elfnn-aarch64.c	2018-09-05 00:44:28.000000000 -0700
++++ gdb-8.2/bfd/elfnn-aarch64.c	2019-03-21 00:05:01.611872050 -0700
+@@ -6875,11 +6875,26 @@ elfNN_aarch64_merge_private_bfd_data (bf
  
    /* Check if we have the same endianess.  */
    if (!_bfd_generic_verify_endian_match (ibfd, info))
@@ -106,12 +99,11 @@ index d5711e0..0ac03e0 100644
    /* The input BFD must have had its flags initialised.  */
    /* The following seems bogus to me -- The flags are initialized in
       the assembler but I don't think an elf_flags_init field is
-diff --git a/bfd/elfxx-aarch64.c b/bfd/elfxx-aarch64.c
-index 9d4aa8f..66950d8 100644
---- a/bfd/elfxx-aarch64.c
-+++ b/bfd/elfxx-aarch64.c
-@@ -548,7 +548,18 @@ _bfd_aarch64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-   return TRUE;
+diff -Naurp gdb-8.2_org/bfd/elfxx-aarch64.c gdb-8.2/bfd/elfxx-aarch64.c
+--- gdb-8.2_org/bfd/elfxx-aarch64.c	2018-09-05 00:44:28.000000000 -0700
++++ gdb-8.2/bfd/elfxx-aarch64.c	2019-03-21 00:05:01.611872050 -0700
+@@ -558,7 +558,18 @@ _bfd_aarch64_elf_resolve_relocation (bfd
+   return value;
  }
  
 -/* Support for core dump NOTE sections.  */
@@ -130,17 +122,19 @@ index 9d4aa8f..66950d8 100644
  
  bfd_boolean
  _bfd_aarch64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
-@@ -561,14 +572,27 @@ _bfd_aarch64_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+@@ -571,14 +582,27 @@ _bfd_aarch64_elf_grok_prstatus (bfd *abf
        default:
  	return FALSE;
  
 -      case 392:		/* sizeof(struct elf_prstatus) on Linux/arm64.  */
 +      case 352:	/* sizeof(struct elf_prstatus) on Linux/aarch64 ilp32.  */
-+	/* pr_cursig */
-+	elf_tdata (abfd)->core->signal
-+	  = bfd_get_16 (abfd, note->descdata + 12);
-+
-+	/* pr_pid */
+ 	/* pr_cursig */
+ 	elf_tdata (abfd)->core->signal
+ 	  = bfd_get_16 (abfd, note->descdata + 12);
+ 
+ 	/* pr_pid */
+-	elf_tdata (abfd)->core->lwpid
+-	  = bfd_get_32 (abfd, note->descdata + 32);
 +	elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
 +
 +	/* pr_reg */
@@ -150,18 +144,16 @@ index 9d4aa8f..66950d8 100644
 +	break;
 +
 +      case 392:	/* sizeof(struct elf_prstatus) on Linux/aarch64.  */
- 	/* pr_cursig */
- 	elf_tdata (abfd)->core->signal
- 	  = bfd_get_16 (abfd, note->descdata + 12);
- 
- 	/* pr_pid */
--	elf_tdata (abfd)->core->lwpid
--	  = bfd_get_32 (abfd, note->descdata + 32);
++	/* pr_cursig */
++	elf_tdata (abfd)->core->signal
++	  = bfd_get_16 (abfd, note->descdata + 12);
++
++	/* pr_pid */
 +	elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 32);
  
  	/* pr_reg */
  	offset = 112;
-@@ -590,12 +614,21 @@ _bfd_aarch64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+@@ -600,12 +624,21 @@ _bfd_aarch64_elf_grok_psinfo (bfd *abfd,
      default:
        return FALSE;
  
@@ -184,6 +176,3 @@ index 9d4aa8f..66950d8 100644
      }
  
    /* Note that for some reason, a spurious space is tacked
--- 
-2.11.1
-

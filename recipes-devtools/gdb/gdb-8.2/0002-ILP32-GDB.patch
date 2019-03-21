@@ -32,21 +32,13 @@ gdb/gdbserver:
         * linux-aarch64-low.c (aarch64_linux_read_description):
 
 Upstream-Status: Backport [https://sourceware.org/git/?p=binutils-gdb.git;a=shortlog;h=refs/heads/users/linaro/gdb-aarch64-ilp32]
----
- gdb/aarch64-linux-nat.c           | 25 ++++++++------
- gdb/aarch64-linux-tdep.c          | 73 ++++++++++++++++++++++++++++++++++++---
- gdb/aarch64-tdep.c                | 35 +++++++++++++++++--
- gdb/aarch64-tdep.h                |  3 ++
- gdb/gdbserver/linux-aarch64-low.c |  7 +++-
- 5 files changed, 124 insertions(+), 19 deletions(-)
 
-diff --git a/gdb/aarch64-linux-nat.c b/gdb/aarch64-linux-nat.c
-index 9385659..bd797fa 100644
---- a/gdb/aarch64-linux-nat.c
-+++ b/gdb/aarch64-linux-nat.c
-@@ -49,6 +49,10 @@
- #define TRAP_HWBKPT 0x0004
- #endif
+diff -Naurp gdb-8.2_org/gdb/aarch64-linux-nat.c gdb-8.2/gdb/aarch64-linux-nat.c
+--- gdb-8.2_org/gdb/aarch64-linux-nat.c	2018-09-05 00:44:28.000000000 -0700
++++ gdb-8.2/gdb/aarch64-linux-nat.c	2019-03-21 00:18:36.635795541 -0700
+@@ -98,6 +98,10 @@ public:
+ 
+ static aarch64_linux_nat_target the_aarch64_linux_nat_target;
  
 +/* Check if we are on arm (as opposed to aarch64).  */
 +#define IS_ARM32(gdbarch) \
@@ -55,8 +47,8 @@ index 9385659..bd797fa 100644
  /* Per-process data.  We don't bind this to a per-inferior registry
     because of targets like x86 GNU/Linux that need to keep track of
     processes that aren't bound to any inferior (e.g., fork children,
-@@ -166,7 +170,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
-   tid = ptid_get_lwp (regcache_get_ptid (regcache));
+@@ -215,7 +219,7 @@ fetch_gregs_from_thread (struct regcache
+   tid = regcache->ptid ().lwp ();
  
    iovec.iov_base = &regs;
 -  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -64,7 +56,7 @@ index 9385659..bd797fa 100644
      iovec.iov_len = 18 * 4;
    else
      iovec.iov_len = sizeof (regs);
-@@ -175,7 +179,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
+@@ -224,7 +228,7 @@ fetch_gregs_from_thread (struct regcache
    if (ret < 0)
      perror_with_name (_("Unable to fetch general registers."));
  
@@ -73,8 +65,8 @@ index 9385659..bd797fa 100644
      aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, 1);
    else
      {
-@@ -203,7 +207,7 @@ store_gregs_to_thread (const struct regcache *regcache)
-   tid = ptid_get_lwp (regcache_get_ptid (regcache));
+@@ -252,7 +256,7 @@ store_gregs_to_thread (const struct regc
+   tid = regcache->ptid ().lwp ();
  
    iovec.iov_base = &regs;
 -  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -82,7 +74,7 @@ index 9385659..bd797fa 100644
      iovec.iov_len = 18 * 4;
    else
      iovec.iov_len = sizeof (regs);
-@@ -212,7 +216,7 @@ store_gregs_to_thread (const struct regcache *regcache)
+@@ -261,7 +265,7 @@ store_gregs_to_thread (const struct regc
    if (ret < 0)
      perror_with_name (_("Unable to fetch general registers."));
  
@@ -91,7 +83,7 @@ index 9385659..bd797fa 100644
      aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, 1);
    else
      {
-@@ -248,7 +252,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
+@@ -296,7 +300,7 @@ fetch_fpregs_from_thread (struct regcach
  
    iovec.iov_base = &regs;
  
@@ -100,7 +92,7 @@ index 9385659..bd797fa 100644
      {
        iovec.iov_len = VFP_REGS_SIZE;
  
-@@ -295,7 +299,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
+@@ -342,7 +346,7 @@ store_fpregs_to_thread (const struct reg
  
    iovec.iov_base = &regs;
  
@@ -109,8 +101,8 @@ index 9385659..bd797fa 100644
      {
        iovec.iov_len = VFP_REGS_SIZE;
  
-@@ -328,7 +332,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
- 			      (char *) &regs.fpcr);
+@@ -373,7 +377,7 @@ store_fpregs_to_thread (const struct reg
+ 	regcache->raw_collect (AARCH64_FPCR_REGNUM, (char *) &regs.fpcr);
      }
  
 -  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -118,7 +110,7 @@ index 9385659..bd797fa 100644
      {
        ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_VFP, &iovec);
        if (ret < 0)
-@@ -460,10 +464,9 @@ ps_err_e
+@@ -554,10 +558,9 @@ ps_err_e
  ps_get_thread_area (struct ps_prochandle *ph,
  		    lwpid_t lwpid, int idx, void **base)
  {
@@ -131,7 +123,7 @@ index 9385659..bd797fa 100644
  }
  
  
-@@ -517,7 +520,7 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+@@ -623,7 +626,7 @@ aarch64_linux_nat_target::low_siginfo_fi
  
    /* Is the inferior 32-bit?  If so, then do fixup the siginfo
       object.  */
@@ -140,10 +132,9 @@ index 9385659..bd797fa 100644
      {
        if (direction == 0)
  	aarch64_compat_siginfo_from_siginfo ((struct compat_siginfo *) inf,
-diff --git a/gdb/aarch64-linux-tdep.c b/gdb/aarch64-linux-tdep.c
-index 1f3e888..e6be93d 100644
---- a/gdb/aarch64-linux-tdep.c
-+++ b/gdb/aarch64-linux-tdep.c
+diff -Naurp gdb-8.2_org/gdb/aarch64-linux-tdep.c gdb-8.2/gdb/aarch64-linux-tdep.c
+--- gdb-8.2_org/gdb/aarch64-linux-tdep.c	2018-09-05 00:44:28.000000000 -0700
++++ gdb-8.2/gdb/aarch64-linux-tdep.c	2019-03-21 00:18:36.636795539 -0700
 @@ -131,13 +131,13 @@
    ucontext.uc_mcontext.  */
  
@@ -160,7 +151,7 @@ index 1f3e888..e6be93d 100644
  
  static void
  aarch64_linux_sigframe_init (const struct tramp_frame *self,
-@@ -186,6 +186,62 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
+@@ -186,6 +186,62 @@ static const struct tramp_frame aarch64_
    aarch64_linux_sigframe_init
  };
  
@@ -223,7 +214,7 @@ index 1f3e888..e6be93d 100644
  /* Register maps.  */
  
  static const struct regcache_map_entry aarch64_linux_gregmap[] =
-@@ -1025,8 +1081,12 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+@@ -1227,8 +1283,12 @@ aarch64_linux_init_abi (struct gdbarch_i
  
    linux_init_abi (info, gdbarch);
  
@@ -238,7 +229,7 @@ index 1f3e888..e6be93d 100644
  
    /* Enable TLS support.  */
    set_gdbarch_fetch_tls_load_module_address (gdbarch,
-@@ -1036,7 +1096,10 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+@@ -1238,7 +1298,10 @@ aarch64_linux_init_abi (struct gdbarch_i
    set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
    set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
  
@@ -250,11 +241,10 @@ index 1f3e888..e6be93d 100644
  
    /* Enable longjmp.  */
    tdep->jb_pc = 11;
-diff --git a/gdb/aarch64-tdep.c b/gdb/aarch64-tdep.c
-index e4cd3b5..0c7f165 100644
---- a/gdb/aarch64-tdep.c
-+++ b/gdb/aarch64-tdep.c
-@@ -2083,6 +2083,22 @@ aarch64_gen_return_address (struct gdbarch *gdbarch,
+diff -Naurp gdb-8.2_org/gdb/aarch64-tdep.c gdb-8.2/gdb/aarch64-tdep.c
+--- gdb-8.2_org/gdb/aarch64-tdep.c	2018-09-05 00:44:28.000000000 -0700
++++ gdb-8.2/gdb/aarch64-tdep.c	2019-03-21 00:21:42.370324895 -0700
+@@ -2145,6 +2145,22 @@ aarch64_gen_return_address (struct gdbar
  }
  
  
@@ -277,8 +267,8 @@ index e4cd3b5..0c7f165 100644
  /* Return the pseudo register name corresponding to register regnum.  */
  
  static const char *
-@@ -2859,6 +2875,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
-   const struct tdesc_feature *feature;
+@@ -2950,6 +2966,10 @@ aarch64_gdbarch_init (struct gdbarch_inf
+   const struct tdesc_feature *feature_sve;
    int num_regs = 0;
    int num_pseudo_regs = 0;
 +  bool ilp32 = false;
@@ -286,9 +276,9 @@ index e4cd3b5..0c7f165 100644
 +  if (info.bfd_arch_info->mach == bfd_mach_aarch64_ilp32)
 +    ilp32 = true;
  
-   /* Ensure we always have a target descriptor.  */
+   /* Ensure we always have a target description.  */
    if (!tdesc_has_registers (tdesc))
-@@ -2916,6 +2936,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -3027,6 +3047,9 @@ aarch64_gdbarch_init (struct gdbarch_inf
         best_arch != NULL;
         best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
      {
@@ -298,15 +288,15 @@ index e4cd3b5..0c7f165 100644
        /* Found a match.  */
        break;
      }
-@@ -2934,6 +2957,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -3045,6 +3068,7 @@ aarch64_gdbarch_init (struct gdbarch_inf
    tdep->lowest_pc = 0x20;
    tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
    tdep->jb_elt_size = 8;
 +  tdep->ilp32 = ilp32;
+   tdep->vq = aarch64_get_tdesc_vq (tdesc);
  
    set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
-   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
-@@ -2981,9 +3005,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -3088,9 +3112,9 @@ aarch64_gdbarch_init (struct gdbarch_inf
    set_gdbarch_float_bit (gdbarch, 32);
    set_gdbarch_double_bit (gdbarch, 64);
    set_gdbarch_long_double_bit (gdbarch, 128);
@@ -318,7 +308,7 @@ index e4cd3b5..0c7f165 100644
    set_gdbarch_char_signed (gdbarch, 0);
    set_gdbarch_wchar_signed (gdbarch, 0);
    set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
-@@ -3026,6 +3050,13 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -3133,6 +3157,13 @@ aarch64_gdbarch_init (struct gdbarch_inf
  
    tdesc_use_registers (gdbarch, tdesc, tdesc_data);
  
@@ -332,25 +322,23 @@ index e4cd3b5..0c7f165 100644
    /* Add standard register aliases.  */
    for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)
      user_reg_add (gdbarch, aarch64_register_aliases[i].name,
-diff --git a/gdb/aarch64-tdep.h b/gdb/aarch64-tdep.h
-index c806125..4d77fc4 100644
---- a/gdb/aarch64-tdep.h
-+++ b/gdb/aarch64-tdep.h
-@@ -73,6 +73,9 @@ struct gdbarch_tdep
- 
+diff -Naurp gdb-8.2_org/gdb/aarch64-tdep.h gdb-8.2/gdb/aarch64-tdep.h
+--- gdb-8.2_org/gdb/aarch64-tdep.h	2018-09-05 00:27:13.000000000 -0700
++++ gdb-8.2/gdb/aarch64-tdep.h	2019-03-21 00:23:08.172108034 -0700
+@@ -79,6 +79,9 @@ struct gdbarch_tdep
    /* syscall record.  */
    int (*aarch64_syscall_record) (struct regcache *regcache, unsigned long svc_number);
+ 
 +  /* If this is ILP32 or LP64.  */
 +  bool ilp32;
 +
- };
+   /* The VQ value for SVE targets, or zero if SVE is not supported.  */
+   uint64_t vq;
  
- const target_desc *aarch64_read_description ();
-diff --git a/gdb/gdbserver/linux-aarch64-low.c b/gdb/gdbserver/linux-aarch64-low.c
-index eccac4d..d49c6e1 100644
---- a/gdb/gdbserver/linux-aarch64-low.c
-+++ b/gdb/gdbserver/linux-aarch64-low.c
-@@ -477,7 +477,12 @@ aarch64_arch_setup (void)
+diff -Naurp gdb-8.2_org/gdb/gdbserver/linux-aarch64-low.c gdb-8.2/gdb/gdbserver/linux-aarch64-low.c
+--- gdb-8.2_org/gdb/gdbserver/linux-aarch64-low.c	2018-09-05 00:27:13.000000000 -0700
++++ gdb-8.2/gdb/gdbserver/linux-aarch64-low.c	2019-03-21 00:29:50.562095470 -0700
+@@ -514,7 +514,13 @@ aarch64_arch_setup (void)
  
    is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
  
@@ -361,9 +349,7 @@ index eccac4d..d49c6e1 100644
 +    error (_("Can't debug 64-bit process with 32-bit GDBserver"));
 +
 +  if (machine == EM_AARCH64)
-     current_process ()->tdesc = aarch64_linux_read_description ();
-   else
-     current_process ()->tdesc = tdesc_arm_with_neon;
--- 
-2.11.1
-
++
+     {
+       uint64_t vq = aarch64_sve_get_vq (tid);
+       current_process ()->tdesc = aarch64_linux_read_description (vq);
